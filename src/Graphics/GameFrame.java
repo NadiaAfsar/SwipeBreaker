@@ -17,6 +17,8 @@ public class GameFrame extends JFrame {
     static JButton history;
     static JLabel recordJLabel;
     static String record;
+    static boolean musicOnOff;
+    static Music music;
 
     public GameFrame() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         addFrame();
@@ -27,6 +29,9 @@ public class GameFrame extends JFrame {
         backGround.setLayout(null);
         panel.add(gamePanel);
         panel.add(backGround);
+        music = new Music();
+        music.play();
+        musicOnOff = true;
         initialMenu();
     }
 
@@ -52,7 +57,7 @@ public class GameFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 emptyPanel();
-                update();
+                new Start(gamePanel);
             }
         });
         gamePanel.add(start);
@@ -66,7 +71,7 @@ public class GameFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 emptyPanel();
-                update();
+                new Settings(gamePanel);
             }
         });
         gamePanel.add(settings);
