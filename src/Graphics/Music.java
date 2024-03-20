@@ -8,7 +8,7 @@ public class Music {
     Clip clip;
     AudioInputStream sound;
     public Music() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
-        File music = new File("C:/Users/NoteBook/Downloads/Music/Obsessed With Your Eyes.wav");
+        File music = new File("audios/Obsessed With Your Eyes.wav");
         sound = AudioSystem.getAudioInputStream(music);
         clip = AudioSystem.getClip();
         clip.open(sound);
