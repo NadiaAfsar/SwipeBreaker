@@ -1,5 +1,9 @@
 package Graphics;
 
+import Logic.EasyGame;
+import Logic.HardGame;
+import Logic.MediumGame;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -135,6 +139,17 @@ public class Start {
                 }
                 else {
                     emptyPanel();
+                    try {
+                        if (difficulty == 0) {
+                            new EasyGame(color, username);
+                        } else if (difficulty == 1) {
+                            new MediumGame(color, username);
+                        } else {
+                            new HardGame(color, username);
+                        }
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });

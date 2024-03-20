@@ -1,5 +1,7 @@
 package Graphics;
 
+import Logic.GameManager;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +24,9 @@ public class Background extends JPanel {
         super.paintComponent(g);
         if (backGround != null) {
             g.drawImage(backGround, 0,0,900,650,null);
+        }
+        if (GameManager.getArrow() != null) {
+            GameManager.getArrow().draw(g);
         }
     }
 

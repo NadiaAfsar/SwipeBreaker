@@ -6,18 +6,20 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Ball {
-    int x;
-    int y;
+    double x;
+    double y;
+    double dx;
+    double dy;
     int colorNumber;
     Color color;
     JLabel ballJLabel;
-    public Ball(int x, int y, int color) {
+    public Ball(double x, double y, int color) {
         this.x = x;
         this.y = y;
         this.colorNumber = color;
         setColor();
         ballJLabel = new JLabel("●");
-        ballJLabel.setBounds(x,y,100,100);
+        ballJLabel.setBounds((int)x,(int)y,100,100);
         ballJLabel.setFont(new Font("Serif",Font.PLAIN,50));
         ballJLabel.setForeground(this.color);
         GameFrame.getGamePanel().add(ballJLabel);
@@ -44,28 +46,42 @@ public class Ball {
         return ballJLabel;
     }
     public int getOx() {
-        return x+20;
+        return (int)x+20;
     }
     public int getOy() {
-        return y+50;
+        return (int)y+50;
     }
-    public void setPosition(int x, int y) {
-        GameFrame.getGamePanel().remove(ballJLabel);
-        ballJLabel.setBounds(x, y, 100, 50);
-        GameFrame.getGamePanel().add(ballJLabel);
+    public void setPosition(double x, double y) {
+        ballJLabel.setBounds((int)x, (int)y, 100, 50);
         this.x = x;
         this.y = y;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
     public int getColorNumber() {
         return colorNumber;
+    }
+
+    public double getDx() {
+        return dx;
+    }
+
+    public void setDx(double dx) {
+        this.dx = dx;
+    }
+
+    public double getDy() {
+        return dy;
+    }
+
+    public void setDy(double dy) {
+        this.dy = dy;
     }
 }
