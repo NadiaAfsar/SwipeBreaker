@@ -14,7 +14,7 @@ public abstract class Item extends ObjectInGame{
     private boolean removed;
     public int initialX;
     public int initialY;
-    public abstract void ability();
+    public abstract void ability() throws IOException;
     @Override
     public void changeColor() throws IOException {
         int x = (int)(Math.random()*4);

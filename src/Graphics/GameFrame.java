@@ -1,5 +1,7 @@
 package Graphics;
 
+import Logic.MyProject;
+
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
@@ -16,7 +18,6 @@ public class GameFrame extends JFrame {
     static JButton settings;
     static JButton history;
     static JLabel recordJLabel;
-    static String record;
     static boolean musicOnOff;
     static Music music;
 
@@ -40,9 +41,10 @@ public class GameFrame extends JFrame {
         addStartButton();
         addSettingsButton();
         addHistoryButton();
+        update();
     }
     static void addRecord() {
-        recordJLabel = new JLabel("RECORD: "+record);
+        recordJLabel = new JLabel("RECORD: "+ MyProject.record);
         recordJLabel.setFont(new Font("Serif",Font.PLAIN,32));
         recordJLabel.setForeground(Color.PINK);
         recordJLabel.setBounds(340,80,300,80);
@@ -85,6 +87,7 @@ public class GameFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 emptyPanel();
+                new History();
                 update();
             }
         });

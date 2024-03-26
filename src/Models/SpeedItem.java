@@ -7,11 +7,12 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class SpeedItem extends Item{
+    private static boolean activated;
+    private static Timer timer;
 
     public SpeedItem(int x, int y, int level) throws IOException {
         this.initialX = x;
@@ -33,13 +34,23 @@ public class SpeedItem extends Item{
     }
     @Override
     public void ability() {
-        GameManager.ballSpeed *= 2;
-        new Timer(15000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                GameManager.ballSpeed /= 2;
-            }
-        }).start();
+        if (activated) {
+            timer.stop();
+            timer.restart();
+        }
+        else {
+            GameManager.ballSpeed *= 2;
+            activated = true;
+            timer = new Timer(15000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    GameManager.ballSpeed /= 2;
+                    activated = false;
+                    timer.stop();
+                }
+            });
+            timer.start();
+        }
     }
 
     @Override

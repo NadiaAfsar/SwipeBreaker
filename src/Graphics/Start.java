@@ -141,11 +141,11 @@ public class Start {
                     emptyPanel();
                     try {
                         if (difficulty == 0) {
-                            new EasyGame(color, username);
+                            new EasyGame(color, username, Settings.saveBoolean, Settings.aimingBoolean);
                         } else if (difficulty == 1) {
-                            new MediumGame(color, username);
+                            new MediumGame(color, username, Settings.saveBoolean, Settings.aimingBoolean);
                         } else {
-                            new HardGame(color, username);
+                            new HardGame(color, username, Settings.saveBoolean, Settings.aimingBoolean);
                         }
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);

@@ -23,6 +23,7 @@ public class BombItem extends Item{
         this.x = x + 25;
         this.y = y + 3;
         this.width = 30;
+        this.level = level;
         this.height = 34;
         setImage();
         objectJLabel = new JLabel(new ImageIcon(image));
@@ -80,11 +81,14 @@ public class BombItem extends Item{
                         brick.setScore(brick.getScore()-50);
                     }
                     else {
-                        if (brick.getColor() == 10) {
+                        if (brick.getColor() == 15) {
                             brick.dancingLight();
                         }
-                        else if (brick.getColor() == 11) {
+                        else if (brick.getColor() == 16) {
                             brick.earthquake();
+                        }
+                        else {
+                            GameFrame.getGamePanel().remove(brick.getScoreJLabel());
                         }
                         GameManager.getObjects().remove(brick);
                         GameManager.addRemoveObject(brick,false);
@@ -93,5 +97,6 @@ public class BombItem extends Item{
                 }
             }
         }
+        GameManager.setBricks();
     }
 }

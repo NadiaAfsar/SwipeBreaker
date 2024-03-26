@@ -7,17 +7,19 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 public class Settings {
-    JPanel gamePanel;
-    JLabel aiming;
-    JButton aimingOnButton;
-    JButton aimingOffButton;
-    JLabel music;
-    JButton musicOnButton;
-    JButton musicOffButton;
-    JLabel save;
-    JButton saveOnButton;
-    JButton saveOffButton;
-    JButton backButton;
+    private JPanel gamePanel;
+    private JLabel aiming;
+    private JButton aimingOnButton;
+    private JButton aimingOffButton;
+    private JLabel music;
+    private JButton musicOnButton;
+    private JButton musicOffButton;
+    private JLabel save;
+    private JButton saveOnButton;
+    private JButton saveOffButton;
+    private JButton backButton;
+    public static boolean saveBoolean;
+    public static boolean aimingBoolean;
     public Settings(JPanel gamePanel) {
         this.gamePanel = gamePanel;
         addAiming();
@@ -38,6 +40,7 @@ public class Settings {
         aimingOnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                aimingBoolean = true;
                 aimingOnButton.setBackground(Color.GREEN);
                 aimingOffButton.setBackground(Color.RED);
             }
@@ -47,6 +50,7 @@ public class Settings {
         aimingOffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                aimingBoolean = false;
                 aimingOnButton.setBackground(Color.RED);
                 aimingOffButton.setBackground(Color.GREEN);
             }
@@ -122,6 +126,7 @@ public class Settings {
         saveOnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                saveBoolean = true;
                 saveOnButton.setBackground(Color.GREEN);
                 saveOffButton.setBackground(Color.RED);
             }
@@ -131,6 +136,7 @@ public class Settings {
         saveOffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                saveBoolean = false;
                 saveOnButton.setBackground(Color.RED);
                 saveOffButton.setBackground(Color.GREEN);
             }

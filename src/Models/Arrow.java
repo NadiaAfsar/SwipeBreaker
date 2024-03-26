@@ -4,22 +4,24 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Arrow extends JComponent {
-    static int x1;
-    static int y1;
-    static int x2;
-    static int y2;
-    static int[] xPoints;
-    static int[] yPoints;
-    static int xo;
-    static int yo;
-    static double sin;
-    static double cos;
+    private static int x1;
+    private static int y1;
+    private static int x2;
+    private static int y2;
+    private static int[] xPoints;
+    private static int[] yPoints;
+    private static int xo;
+    private static int yo;
+    private static double sin;
+    private static double cos;
+    private static boolean aiming;
 
-    public Arrow(int x1, int y1, int x2, int y2) {
+    public Arrow(int x1, int y1, int x2, int y2, boolean aiming) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
+        this.aiming = aiming;
         trianglePoints();
     }
     public static void draw(Graphics g) {
@@ -28,11 +30,12 @@ public class Arrow extends JComponent {
         g2D.setColor(Color.PINK);
         g2D.drawLine(x1, y1, xo, yo);
         g2D.fillPolygon(xPoints, yPoints, 3);
-        float[] dashingPattern = {2f, 2f};
-        Stroke stroke = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f,
-                dashingPattern, 2.0f);
-        g2D.setStroke(stroke);
-        g2D.drawLine(xo, yo, xo + (int)(cos*900), yo - (int)(sin*900));
+        if (aiming) {
+            float[] dashingPattern = {2f, 2f};
+            Stroke stroke = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, dashingPattern, 2.0f);
+            g2D.setStroke(stroke);
+            g2D.drawLine(xo, yo, xo + (int) (cos * 900), yo - (int) (sin * 900));
+        }
     }
     private void trianglePoints() {
         int dy = y1 - y2;

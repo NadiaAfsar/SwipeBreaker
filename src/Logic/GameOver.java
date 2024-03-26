@@ -7,28 +7,40 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameOver {
-    int difficultyLevel;
-    int ballColor;
-    String username;
-    JLabel gameOver;
-    int score;
-    JLabel scoreJLabel;
-    JButton playAgain;
-    JButton newGame;
-    JButton mainMenu;
+    private int difficultyLevel;
+    private int ballColor;
+    private String username;
+    private JLabel gameOver;
+    private int score;
+    private JLabel scoreJLabel;
+    private JButton playAgain;
+    private JButton newGame;
+    private JButton mainMenu;
+    private boolean save;
+    private boolean aiming;
+    private String time;
 
-    public GameOver(int difficultyLevel, int ballColor, String username, int score) {
+    public GameOver(int difficultyLevel, int ballColor, String username, int score, boolean save, boolean aiming, String time) throws IOException {
         this.difficultyLevel = difficultyLevel;
         this.ballColor = ballColor;
         this.username = username;
         this.score = score;
+        this.save = save;
+        this.aiming = aiming;
+        this.time = time;
         setGameOver();
         setScore();
         setPlayAgain();
         setNewGame();
         setMainMenu();
+        System.out.println(1);
+        saveGame();
     }
     private void setGameOver() {
         gameOver = new JLabel("Game Over");
@@ -56,21 +68,21 @@ public class GameOver {
                 emptyPanel();
                 if (difficultyLevel == 1) {
                     try {
-                        new EasyGame(ballColor, username);
+                        new EasyGame(ballColor, username, save, aiming);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
                 }
                 else if (difficultyLevel == 2) {
                     try {
-                        new MediumGame(ballColor, username);
+                        new MediumGame(ballColor, username, save, aiming);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
                 }
                 else {
                     try {
-                        new HardGame(ballColor, username);
+                        new HardGame(ballColor, username, save , aiming);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -114,5 +126,24 @@ public class GameOver {
         GameFrame.getGamePanel().remove(playAgain);
         GameFrame.getGamePanel().remove(newGame);
         GameFrame.getGamePanel().remove(mainMenu);
+    }
+    private String date() {
+        DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        LocalDateTime now = LocalDateTime.now();
+        return date.format(now);
+    }
+    private void saveGame() throws IOException {
+        if (save) {
+            Map<String, String> map = new HashMap<>();
+            map.put("date", date());
+            map.put("name", username);
+            map.put("time", time);
+            map.put("score", score+"");
+            MyProject.saved.add(map);
+            if (score > MyProject.record) {
+                MyProject.record = score;
+            }
+            MyProject.save();
+        }
     }
 }

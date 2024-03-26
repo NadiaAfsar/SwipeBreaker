@@ -2,7 +2,6 @@ package Models;
 
 import Graphics.GameFrame;
 import Logic.GameManager;
-import Graphics.Background;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,6 +14,8 @@ import java.io.IOException;
 
 public class Brick extends ObjectInGame{
     private int color;
+    private int originalX;
+    private int originalY;
     private int score;
     private int initialScore;
     private Timer timer;
@@ -22,7 +23,11 @@ public class Brick extends ObjectInGame{
     private BufferedImage image2;
     private JLabel scoreJLabel;
     private boolean removed;
-    private long startTime;
+    private static long danceStartTime;
+    private static long earthQuakeStartTime;
+    private static boolean dance;
+    private static boolean earthquake;
+    private Timer earthQuake;
     public Brick(int x, int y, int color, int score) throws IOException {
         this.color = color;
         this.score = score;
@@ -30,6 +35,8 @@ public class Brick extends ObjectInGame{
         this.initialScore = score;
         this.x = x;
         this.y = y;
+        this.originalX = x;
+        this.originalY = y;
         width = 80;
         height = 40;
         setImage(color);
@@ -39,32 +46,32 @@ public class Brick extends ObjectInGame{
         GameFrame.getGamePanel().add(objectJLabel);
     }
     private void setImage(int color) throws IOException {
-        if (color == 0 || color == 1) {
+        if (color >= 0 && color <= 2) {
             image = ImageIO.read(new File("pics/blue.png"));
             image1 = ImageIO.read(new File("pics/blue1.png"));
             image2 = ImageIO.read(new File("pics/blue2.png"));
         }
-        else if (color == 2 || color == 3) {
+        else if (color >= 3 && color <= 5) {
             image = ImageIO.read(new File("pics/brown.png"));
             image1 = ImageIO.read(new File("pics/brown1.png"));
             image2 = ImageIO.read(new File("pics/brown2.png"));
         }
-        else if (color == 4 || color == 5) {
+        else if (color >= 6 && color <= 8) {
             image = ImageIO.read(new File("pics/pink.jpg"));
             image1 = ImageIO.read(new File("pics/pink1.jpg"));
             image2 = ImageIO.read(new File("pics/pink2.jpg"));
         }
-        else if (color == 6 || color == 7) {
+        else if (color >= 9 && color <= 11) {
             image = ImageIO.read(new File("pics/red.png"));
             image1 = ImageIO.read(new File("pics/red1.png"));
             image2 = ImageIO.read(new File("pics/red2.png"));
         }
-        else if (color == 8 || color == 9){
+        else if (color >= 12 && color <= 14){
             image = ImageIO.read(new File("pics/yellow.png"));
             image1 = ImageIO.read(new File("pics/yellow1.png"));
             image2 = ImageIO.read(new File("pics/yellow2.png"));
         }
-        else if (color == 10) {
+        else if (color == 15) {
             image = ImageIO.read(new File("pics/dancingLight.jpg"));
             image1 = ImageIO.read(new File("pics/dancingLight1.jpg"));
             image2 = ImageIO.read(new File("pics/dancingLight2.jpg"));
@@ -101,7 +108,9 @@ public class Brick extends ObjectInGame{
     @Override
     public void changePlace(int x, int y) {
         this.x = x;
+        int dy = y - this.y;
         this.y = y;
+        this.originalY += dy;
         if (isSimple()) {
             scoreJLabel.setBounds(x + 45, y, 80, 40);
         }
@@ -111,10 +120,10 @@ public class Brick extends ObjectInGame{
     @Override
     public void collided() throws IOException {
         GameFrame.getGamePanel().remove(objectJLabel);
-        if (color == 10) {
+        if (color == 15) {
             dancingLight();
         }
-        else if (color == 11) {
+        else if (color == 16) {
             earthquake();
         }
         else {
@@ -138,41 +147,74 @@ public class Brick extends ObjectInGame{
         return level;
     }
     public void dancingLight() {
-        startTime = System.currentTimeMillis();
-        timer = new Timer(500, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                for (int i = 0; i < GameManager.getObjects().size(); i++) {
-                    try {
-                        GameManager.getObjects().get(i).changeColor();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-                for (int i = 0; i < GameManager.getReleasedBalls().size(); i++) {
-                    GameManager.getReleasedBalls().get(i).changeColor();
-                }
-                changeBackGround();
-                if (System.currentTimeMillis() - startTime >= 10000) {
-                    timer.stop();
+        if (dance) {
+            danceStartTime += 10000;
+        } else {
+            danceStartTime = System.currentTimeMillis();
+            dance = true;
+            timer = new Timer(500, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
                     for (int i = 0; i < GameManager.getObjects().size(); i++) {
                         try {
-                            GameManager.getObjects().get(i).backToInitial();
+                            GameManager.getObjects().get(i).changeColor();
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);
                         }
                     }
                     for (int i = 0; i < GameManager.getReleasedBalls().size(); i++) {
-                        GameManager.getReleasedBalls().get(i).backToInitial();
+                        GameManager.getReleasedBalls().get(i).changeColor();
                     }
-                    GameManager.changeBackGround("pics/background - Copy.jpg");
+                    changeBackGround();
+                    if (System.currentTimeMillis() - danceStartTime >= 10000) {
+                        timer.stop();
+                        dance = false;
+                        for (int i = 0; i < GameManager.getObjects().size(); i++) {
+                            try {
+                                GameManager.getObjects().get(i).backToInitial();
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                        for (int i = 0; i < GameManager.getReleasedBalls().size(); i++) {
+                            GameManager.getReleasedBalls().get(i).backToInitial();
+                        }
+                        GameManager.changeBackGround("pics/background - Copy.jpg");
+                    }
                 }
-            }
-        });
-        timer.start();
+            });
+            timer.start();
+        }
     }
     public void earthquake() {
-
+        if (earthquake) {
+            earthQuakeStartTime += 10000;
+        }
+        else {
+            earthQuakeStartTime = System.currentTimeMillis();
+            earthquake = true;
+            earthQuake = new Timer(1000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    for (int i = 0; i < GameManager.getObjects().size(); i++) {
+                        ObjectInGame object = GameManager.getObjects().get(i);
+                        if (object instanceof Brick) {
+                            ((Brick) object).changeSize();
+                        }
+                    }
+                    if (System.currentTimeMillis() - earthQuakeStartTime >= 10000) {
+                        earthQuake.stop();
+                        for (int i = 0; i < GameManager.getObjects().size(); i++) {
+                            ObjectInGame object = GameManager.getObjects().get(i);
+                            if (object instanceof Brick) {
+                                ((Brick) object).backToOriginal();
+                            }
+                        }
+                    }
+                }
+            });
+            earthQuake.start();
+        }
     }
     public void changeColor() throws IOException {
         if (isSimple()) {
@@ -207,7 +249,7 @@ public class Brick extends ObjectInGame{
         }
     }
     private boolean isSimple() {
-        return (color != 10 && color != 11);
+        return (color != 15 && color != 16);
     }
     public void backToInitial() throws IOException {
         if (isSimple()) {
@@ -231,5 +273,40 @@ public class Brick extends ObjectInGame{
 
     public int getColor() {
         return color;
+    }
+    private void changeSize() {
+        int x = (int)(Math.random()*3);
+        if (x == 0) {
+            this.x = originalX;
+            this.y = originalY;
+            width = 80;
+            height = 40;
+            objectJLabel.setBounds(this.x,this.y,width,height);
+            objectJLabel.setIcon(new ImageIcon(image));
+        }
+        else if (x == 1) {
+            this.x = originalX+10;
+            this.y = originalY+5;
+            width = 60;
+            height = 30;
+            objectJLabel.setBounds(this.x,this.y,width,height);
+            objectJLabel.setIcon(new ImageIcon(image1));
+        }
+        else if (x == 2) {
+            this.x = originalX-10;
+            this.y = originalY-5;
+            width = 100;
+            height = 50;
+            objectJLabel.setBounds(this.x,this.y,width,height);
+            objectJLabel.setIcon(new ImageIcon(image2));
+        }
+    }
+    private void backToOriginal() {
+        this.x = originalX;
+        this.y = originalY;
+        width = 80;
+        height = 40;
+        objectJLabel.setBounds(this.x,this.y,width,height);
+        objectJLabel.setIcon(new ImageIcon(image));
     }
 }

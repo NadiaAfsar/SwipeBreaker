@@ -5,8 +5,7 @@ import Graphics.Start;
 import Models.*;
 import Graphics.Background;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
@@ -15,10 +14,9 @@ import java.io.IOException;
 import java.util.*;
 
 public abstract class GameManager {
-    public int difficultyLevel;
+    public static int difficultyLevel;
     private JPanel gamePanel;
     public int bricksScore;
-    private int score;
     private double totalScore;
     private int ballColor;
     private String username;
@@ -56,12 +54,17 @@ public abstract class GameManager {
     private long hour;
     private long minute;
     private long second;
-    private final long startTime;
+    private long startTime;
     private JLabel timeJLabel;
     private JLabel scoreJLabel1;
     private JLabel scoreJLabel2;
     private int lastY;
-    public GameManager(int ballColor, String username) {
+    private boolean save;
+    private boolean aiming;
+    public static boolean inverse;
+    public GameManager(int ballColor, String username, boolean save, boolean aiming) {
+        this.save = save;
+        this.aiming = aiming;
         gameBackGround = new Background("pics/background - Copy.jpg");
         GameFrame.getPanel().remove(GameFrame.getBackGround());
         GameFrame.getPanel().add(gameBackGround);
@@ -79,6 +82,7 @@ public abstract class GameManager {
         ballsPower = 1;
         hearts = 0;
         ballSpeed = 1;
+        totalScore = 0;
         vertigo = false;
         addMouseListener();
         startTime = System.currentTimeMillis()/1000;
@@ -115,6 +119,10 @@ public abstract class GameManager {
                 try {
                     showTime();
                     showScore();
+                    if (inverse) {
+                        moveBricks(-80);
+                        inverse = false;
+                    }
                     if (!released) {
                         moveBricks(speed);
                     }
@@ -124,11 +132,11 @@ public abstract class GameManager {
             }
         });
     }
-    public void update() {
+    public static void update() {
         GameFrame.getGamePanel().revalidate();
         GameFrame.getGamePanel().repaint();
     }
-    private void setBricks() {
+    public static void setBricks() {
         isFull = new HashMap<>();
         for (int i = 0; i < objects.size(); i++) {
             addRemoveObject(objects.get(i), true);
@@ -157,19 +165,30 @@ public abstract class GameManager {
             int x = getRandomX();
             if (x != 10) {
                 addedObjects.put(x, true);
-                Brick brick = new Brick(x * 80 - 10, -50+lastY, (int) (Math.random() * 12), bricksScore);
+                Brick brick = new Brick(x * 80 - 10, -50+lastY, (int) (Math.random() * 17), bricksScore);
                 objects.add(brick);
             }
         }
         addItems();
         update();
     }
-    private void moveBricks(int distance) throws IOException {
+    public void moveBricks(int distance) throws IOException {
+        boolean ended = false;
         for (int i = 0; i < objects.size(); i++) {
             ObjectInGame object = objects.get(i);
             object.changePlace(object.getX(),object.getY()+distance);
             if (object.getY() >= 450) {
-                gameOver();
+                if (hearts == 0 && !ended) {
+                    ended = true;
+                    gameOver();
+                }
+                else {
+                    objects.remove(object);
+                    gamePanel.remove(object.getObjectJLabel());
+                    if (object instanceof Brick) {
+                        gamePanel.remove(((Brick)object).getScoreJLabel());
+                    }
+                }
             }
         }
         if (addNewObjects()) {
@@ -222,8 +241,20 @@ public abstract class GameManager {
                 if (!released) {
                     setBricks();
                     arrow = null;
-                    int x = (int) MouseInfo.getPointerInfo().getLocation().getX() - 190;
-                    int y = (int) MouseInfo.getPointerInfo().getLocation().getY() - 40;
+                    int x = 0;
+                    int y = 0;
+                    if (vertigo) {
+                        x = (int)(Math.random()*900);
+                        y = (int)(Math.random()*540);
+                        vertigo = false;
+                    }
+                    else {
+                        x = (int) MouseInfo.getPointerInfo().getLocation().getX() - 190;
+                        y = (int) MouseInfo.getPointerInfo().getLocation().getY() - 40;
+                        if (y > 540) {
+                            y = 540;
+                        }
+                    }
                     calculateD(x, y);
                     releaseBalls();
                     update();
@@ -250,7 +281,7 @@ public abstract class GameManager {
         int x = (int)MouseInfo.getPointerInfo().getLocation().getX() - 190;
         int y = (int)MouseInfo.getPointerInfo().getLocation().getY() - 40;
         if (y < 545) {
-            arrow = new Arrow(this.ball.getOx(), this.ball.getOy(), x, y);
+            arrow = new Arrow(this.ball.getOx(), this.ball.getOy(), x, y, aiming);
             update();
         }
     }
@@ -292,47 +323,45 @@ public abstract class GameManager {
         int xd = (int) ball.getDx();
         int yd = (int) ball.getDy();
         if (!ballOnFloor(ball)) {
-            if (isFull.get((xo+20)+"&"+yo) != null) {
-                ObjectInGame object = isFull.get((xo+20)+"&"+yo);
-                objectCollided(object, object.getX() - 45, ball.getY());
-                if (object instanceof Brick) {
-                ball.setDx(-ball.getDx());
+                if (isFull.get((xo + 20) + "&" + yo) != null) {
+                    ObjectInGame object = isFull.get((xo + 20) + "&" + yo);
+                    objectCollided(object, object.getX() - 45, ball.getY());
+                    if (object instanceof Brick) {
+                        ball.setDx(-ball.getDx());
+                    }
+                } else if (isFull.get((xo - 20) + "&" + yo) != null) {
+                    ObjectInGame object = isFull.get((xo - 20) + "&" + yo);
+                    objectCollided(object, object.getX() + 110, ball.getY());
+                    if (object instanceof Brick) {
+                        ball.setDx(-ball.getDx());
+                    }
                 }
-            }
-            else if (isFull.get((xo-20)+"&"+yo) != null) {
-                ObjectInGame object = isFull.get((xo-20)+"&"+yo);
-                objectCollided(object, object.getX() + 110, ball.getY());
-                if (object instanceof Brick) {
+                if (isFull.get(xo + "&" + (yo + 20)) != null) {
+                    ObjectInGame object = isFull.get(xo + "&" + (yo + 20));
+                    objectCollided(object, ball.getX(), object.getY() - 75);
+                    if (object instanceof Brick) {
+                        ball.setDy(-ball.getDy());
+                    }
+                } else if (isFull.get(xo + "&" + (yo - 20)) != null) {
+                    ObjectInGame object = isFull.get(xo + "&" + (yo - 20));
+                    objectCollided(object, ball.getX(), object.getY() + 75);
+                    if (object instanceof Brick) {
+                        ball.setDy(-ball.getDy());
+                    }
+                }
+                if (xo + xd + 20 >= 720) {
+                    ball.setPosition(680, ball.getY());
                     ball.setDx(-ball.getDx());
                 }
-            }
-            if (isFull.get(xo+"&"+(yo+20)) != null) {
-                ObjectInGame object = isFull.get(xo+"&"+(yo+20));
-                objectCollided(object, ball.getX(), object.getY() - 75);
-                if (object instanceof Brick) {
+                if (xo + xd - 10 <= 0) {
+                    ball.setPosition(0, ball.getY());
+                    ball.setDx(-ball.getDx());
+                }
+                if (yo - yd - 20 <= 0) {
+                    ball.setPosition(ball.getX(), 10);
                     ball.setDy(-ball.getDy());
                 }
-            }
-            else if (isFull.get(xo+"&"+(yo-20)) != null) {
-                ObjectInGame object = isFull.get(xo+"&"+(yo-20));
-                objectCollided(object, ball.getX(), object.getY()+75);
-                if (object instanceof Brick) {
-                    ball.setDy(-ball.getDy());
-                }
-            }
-            if (xo+xd+20 >= 720) {
-                ball.setPosition(680,ball.getY());
-                ball.setDx(-ball.getDx());
-            }
-            if (xo+xd-10 <= 0) {
-                ball.setPosition(0,ball.getY());
-                ball.setDx(-ball.getDx());
-            }
-            if (yo-yd-20 <= 0) {
-                ball.setPosition(ball.getX(), 10);
-                ball.setDy(-ball.getDy());
-            }
-            update();
+                update();
         }
     }
     private void calculateD(int x, int y) {
@@ -361,7 +390,7 @@ public abstract class GameManager {
     private boolean ballOnFloor(Ball ball) throws IOException {
         int xo = ball.getOx();
         int yo = ball.getOy();
-        if (yo - 50 >= 520) {
+        if (yo - 20 >= 570) {
             fallenBalls++;
             releasedBalls.remove(ball);
             releasedBallsNumber--;
@@ -375,11 +404,12 @@ public abstract class GameManager {
                 ball.setPosition(xo - 10, 500);
                 fallenBallsArray.add(ball);
             }
-            if (fallenBalls == balls) {
+            if (releasedBalls.size() == 0) {
                 for (int i = 0; i < fallenBallsArray.size(); i++) {
                     gamePanel.remove(fallenBallsArray.get(i).getBallJLabel());
                 }
                 this.ball = new Ball(ballX, 500, ballColor);
+
                 firstBallFell = false;
                 balls += newBalls + 1;
                 ballsInGame = balls;
@@ -404,15 +434,39 @@ public abstract class GameManager {
                 }
                 objects.remove(object);
                 addRemoveObject(object, false);
+                setBricks();
             }
         }
         else {
             objects.remove(object);
             addRemoveObject(object, false);
+            setBricks();
         }
         object.collided();
     }
-    public abstract void increaseScore();
+
+    public void increaseScore() {
+        if (difficultyLevel == 1) {
+            bricksScore++;
+        }
+        else if (difficultyLevel == 2) {
+            if (bricksScore == 0) {
+                bricksScore++;
+            }
+            else {
+                bricksScore += 2;
+            }
+        }
+        else {
+            if (bricksScore == 0) {
+                bricksScore++;
+            }
+            else {
+                bricksScore += 5;
+            }
+        }
+    }
+
     private void addItems() throws IOException {
         for (int i = 1; i <= 3; i++) {
             int x = getRandomX();
@@ -424,38 +478,41 @@ public abstract class GameManager {
             }
         }
     }
-    private Item getItem(int x, int y) throws IOException {
+    private Item getItem(int x, int y) throws IOException{
         int i = 0;
         if (!heartUsed) {
-            i = (int) (Math.random() * 15);
+            i = (int) (Math.random() * 16);
         }
         else {
-            i = (int) (Math.random() * 14);
+            i = (int) (Math.random() * 15);
         }
         if (i >= 0 && i <= 9) {
-            return new NewBallItem(x * 80 - 10, y, score);
+            return new NewBallItem(x * 80 - 10, y, bricksScore);
 
         }
         else if (i == 10) {
             try {
-                return new BombItem(x * 80 - 10, y, score);
+                return new BombItem(x * 80 - 10, y, bricksScore);
             }
             catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
         else if (i == 11) {
-            return new PowerItem(x*80-10,y, score);
+            return new PowerItem(x*80-10,y, bricksScore);
         }
         else if (i == 12) {
-            return new SpeedItem(x*80-10,y, score);
+            return new SpeedItem(x*80-10,y, bricksScore);
         }
         else if (i == 13) {
-            return new VertigoItem(x*80-10,y, score);
+            return new VertigoItem(x*80-10,y, bricksScore);
         }
         else if (i == 14) {
+            return new InverseItem(x*80-10,y, bricksScore);
+        }
+        else if (i == 15) {
             heartUsed = true;
-            return new HeartItem(x*80-10,y, score);
+            return new HeartItem(x*80-10,y, bricksScore);
         }
         return null;
     }
@@ -529,13 +586,16 @@ public abstract class GameManager {
         gamePanel.remove(timeJLabel);
         gamePanel.remove(scoreJLabel1);
         gamePanel.remove(scoreJLabel2);
+        if (arrow != null) {
+            gamePanel.remove(arrow);
+        }
         GameFrame.getGamePanel().remove(backButton);
         GameFrame.getPanel().remove(gameBackGround);
         GameFrame.getPanel().add(GameFrame.getBackGround());
     }
-    private void gameOver() {
+    private void gameOver() throws IOException {
         emptyPanel();
-        new GameOver(difficultyLevel, ballColor, username, (int)totalScore);
+        showTime();
+        new GameOver(difficultyLevel, ballColor, username, (int) totalScore, save, aiming, timeJLabel.getText() );
     }
-
 }

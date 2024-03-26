@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class PowerItem extends  Item{
+    private boolean activated;
+    private static Timer timer;
     public PowerItem(int x, int y, int level) throws IOException {
         this.initialX = x;
         this.initialY = y;
@@ -31,13 +33,22 @@ public class PowerItem extends  Item{
     }
     @Override
     public void ability() {
-        GameManager.ballsPower = 2;
-        new Timer(15000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                GameManager.ballsPower = 1;
-            }
-        }).start();
+        if (activated) {
+            timer.stop();
+            timer.restart();
+        } else {
+            GameManager.ballsPower = 2;
+            activated = true;
+            timer = new Timer(15000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    GameManager.ballsPower = 1;
+                    activated = false;
+                    timer.stop();
+                }
+            });
+            timer.start();
+        }
     }
 
     @Override
