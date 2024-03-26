@@ -64,7 +64,7 @@ public class Start {
         ballColor.setForeground(Color.PINK);
         ballColor.setBounds(200,160,300,80);
         gamePanel.add(ballColor);
-        black = new JButton("Black");
+        black = new JButton("Green");
         white = new JButton("White");
         blue = new JButton("Blue");
         red = new JButton("Red");

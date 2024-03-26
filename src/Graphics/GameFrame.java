@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 public class GameFrame extends JFrame {
-    private Background backGround;
+    static Background backGround;
     static JPanel panel;
     static JPanel gamePanel;
     static JButton start;
@@ -25,7 +25,7 @@ public class GameFrame extends JFrame {
         addPanel();
         addGamePanel();
 
-        backGround = new Background();
+        backGround = new Background("pics/background.jpg");
         backGround.setLayout(null);
         panel.add(gamePanel);
         panel.add(backGround);
@@ -132,5 +132,13 @@ public class GameFrame extends JFrame {
         gamePanel.remove(settings);
         gamePanel.remove(history);
         gamePanel.remove(recordJLabel);
+    }
+
+    public static Background getBackGround() {
+        return backGround;
+    }
+
+    public static JPanel getPanel() {
+        return panel;
     }
 }

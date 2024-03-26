@@ -12,9 +12,9 @@ import java.io.IOException;
 public class Background extends JPanel {
     private BufferedImage backGround;
 
-    public Background() {
+    public Background(String path) {
         try {
-            backGround = ImageIO.read(new File("pics/background.jpg"));
+            backGround = ImageIO.read(new File(path));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
