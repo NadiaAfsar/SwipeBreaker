@@ -20,6 +20,7 @@ public class GameFrame extends JFrame {
     static JLabel recordJLabel;
     static boolean musicOnOff;
     static Music music;
+    static JButton exit;
 
     public GameFrame() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         addFrame();
@@ -41,6 +42,7 @@ public class GameFrame extends JFrame {
         addStartButton();
         addSettingsButton();
         addHistoryButton();
+        addExitButton();
         update();
     }
     static void addRecord() {
@@ -135,6 +137,7 @@ public class GameFrame extends JFrame {
         gamePanel.remove(settings);
         gamePanel.remove(history);
         gamePanel.remove(recordJLabel);
+        gamePanel.remove(exit);
     }
 
     public static Background getBackGround() {
@@ -143,5 +146,18 @@ public class GameFrame extends JFrame {
 
     public static JPanel getPanel() {
         return panel;
+    }
+    private static void addExitButton() {
+        exit = new JButton("Exit");
+        exit.setBounds(700, 400, 100, 50);
+        exit.setBackground(Color.RED);
+        exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                emptyPanel();
+                System.exit(0);
+            }
+        });
+        gamePanel.add(exit);
     }
 }
